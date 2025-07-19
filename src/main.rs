@@ -24,7 +24,7 @@ async fn main() {
     let mut lines: Vec<Vec<Brush>> = vec![];
     let mut current_line: Vec<Brush> = vec![];
 
-    let mut egui_color = egui::Color32::LIGHT_BLUE;
+    let mut egui_color = egui::Color32::WHITE;
     let mut brush_color = WHITE;
     let mut brush_size = 3.0;
 
@@ -100,6 +100,8 @@ async fn main() {
 
         // MARK: DRAW
         draw_rectangle_lines(-250.0, -250.0, 500.0, 500.0, 2.0, YELLOW);
+
+        // need a new function to render smooth curved lines. probably splines
 
         for line in lines.iter() {
             draw_multi_line(line);
