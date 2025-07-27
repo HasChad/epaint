@@ -12,6 +12,7 @@ pub struct DrawState {
     pub current_line: Vec<BrushStroke>,
     pub brush_color: Color,
     pub brush_size: f32,
+    pub bg_color: Color,
 }
 
 impl DrawState {
@@ -21,6 +22,7 @@ impl DrawState {
             current_line: vec![],
             brush_color: WHITE,
             brush_size: 3.0,
+            bg_color: BLACK,
         }
     }
 

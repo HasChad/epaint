@@ -105,6 +105,8 @@ async fn main() {
                             draw_state.lines.clear();
                         }
 
+                        ui.add_space(50.0);
+
                         ui.label(&format!("fps: {}", get_fps()))
                     });
                 });
