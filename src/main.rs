@@ -3,15 +3,10 @@ use egui_macroquad::egui::{self, Slider};
 use macroquad::prelude::*;
 
 mod app_settings;
+mod drawing;
 
 use app_settings::*;
-
-#[derive(Clone)]
-struct Brush {
-    point: Vec2,
-    color: Color,
-    size: f32,
-}
+use drawing::*;
 
 #[macroquad::main(window_conf)]
 async fn main() {
@@ -21,12 +16,7 @@ async fn main() {
     };
     let mut zoomer = ZOOM_DEFAULT;
 
-    let mut lines: Vec<Vec<Brush>> = vec![];
-    let mut current_line: Vec<Brush> = vec![];
-
-    let mut egui_color = egui::Color32::WHITE;
-    let mut brush_color = WHITE;
-    let mut brush_size = 3.0;
+    let mut draw_state = DrawState::new();
 
     loop {
         camera_fixer(&mut camera, &mut zoomer);
@@ -37,40 +27,40 @@ async fn main() {
         });
 
         if is_mouse_button_pressed(MouseButton::Left) {
-            lines.push(vec![Brush {
+            draw_state.lines.push(vec![BrushStroke {
                 point: Vec2 {
                     x: world_mpos.x,
                     y: world_mpos.y,
                 },
-                color: brush_color,
-                size: brush_size,
+                color: draw_state.brush_color,
+                size: draw_state.brush_size,
             }]);
         }
 
         if is_mouse_button_down(MouseButton::Left) {
             if mouse_delta_position().x != 0.0 || mouse_delta_position().y != 0.0 {
-                current_line.push(Brush {
+                draw_state.current_line.push(BrushStroke {
                     point: Vec2 {
                         x: world_mpos.x,
                         y: world_mpos.y,
                     },
-                    color: brush_color,
-                    size: brush_size,
+                    color: draw_state.brush_color,
+                    size: draw_state.brush_size,
                 });
             }
 
-            if lines.len() > 0 {
-                let last_idx = lines.len() - 1;
-                lines[last_idx] = current_line.clone();
+            if draw_state.lines.len() > 0 {
+                let last_idx = draw_state.lines.len() - 1;
+                draw_state.lines[last_idx] = draw_state.current_line.clone();
             }
         }
 
         if is_mouse_button_released(MouseButton::Left) {
-            current_line = vec![];
+            draw_state.current_line = vec![];
         }
 
         if is_key_pressed(KeyCode::A) {
-            lines.pop();
+            draw_state.lines.pop();
         }
 
         // ! draw
@@ -79,68 +69,55 @@ async fn main() {
 
         // MARK: UI
         egui_macroquad::ui(|egui_ctx| {
-            egui::Window::new("Settings")
-                .collapsible(false)
+            egui::TopBottomPanel::top("menu_bar")
+                .exact_height(25.0)
+                .show_separator_line(true)
                 .show(egui_ctx, |ui| {
-                    ui.label("Test");
-                    ui.add(Slider::new(&mut brush_size, 1.0..=10.0).text("Brush Size"));
+                    egui::menu::bar(ui, |ui| {
+                        ui.label("Brush Size:");
+                        ui.add(
+                            Slider::new(&mut draw_state.brush_size, 1.0..=10.0)
+                                .trailing_fill(true)
+                                .step_by(0.1),
+                        );
 
-                    if ui.color_edit_button_srgba(&mut egui_color).changed() {
-                        brush_color.a = egui_color.a() as f32 / 255.0;
-                        brush_color.r = egui_color.r() as f32 / 255.0;
-                        brush_color.g = egui_color.g() as f32 / 255.0;
-                        brush_color.b = egui_color.b() as f32 / 255.0;
-                    }
+                        ui.label("Color:");
 
-                    if ui.button("Undo").clicked() {
-                        lines.pop();
-                    }
+                        let mut egui_color = egui::Color32::WHITE;
+
+                        egui_color[0] = 255.min((draw_state.brush_color.r * 255.0) as u8);
+                        egui_color[1] = 255.min((draw_state.brush_color.g * 255.0) as u8);
+                        egui_color[2] = 255.min((draw_state.brush_color.b * 255.0) as u8);
+                        egui_color[3] = 255.min((draw_state.brush_color.a * 255.0) as u8);
+
+                        if ui.color_edit_button_srgba(&mut egui_color).changed() {
+                            draw_state.brush_color.a = egui_color.a() as f32 / 255.0;
+                            draw_state.brush_color.r = egui_color.r() as f32 / 255.0;
+                            draw_state.brush_color.g = egui_color.g() as f32 / 255.0;
+                            draw_state.brush_color.b = egui_color.b() as f32 / 255.0;
+                        }
+
+                        if ui.button("Undo").clicked() {
+                            draw_state.lines.pop();
+                        }
+
+                        if ui.button("Clear").clicked() {
+                            draw_state.lines.clear();
+                        }
+
+                        ui.label(&format!("fps: {}", get_fps()))
+                    });
                 });
         });
 
         // MARK: DRAW
-        draw_rectangle_lines(-250.0, -250.0, 500.0, 500.0, 2.0, YELLOW);
+        draw_rectangle_lines(-250.0, -250.0, 500.0, 500.0, 5.0, YELLOW);
 
-        // need a new function to render smooth curved lines. probably splines
-
-        for line in lines.iter() {
-            draw_multi_line(line);
-        }
+        // FIXME: need a new function to render smooth curved lines. probably splines
+        draw_state.line_render();
 
         egui_macroquad::draw();
 
         next_frame().await
-    }
-}
-
-fn draw_multi_line(line: &Vec<Brush>) {
-    let mut prev_point: &Vec2 = &Vec2::ZERO;
-    for (i, stroke) in line.iter().enumerate() {
-        if i == 0 {
-            draw_circle(
-                stroke.point.x,
-                stroke.point.y,
-                stroke.size / 2.0,
-                stroke.color,
-            );
-            prev_point = &stroke.point;
-            continue;
-        }
-
-        draw_circle(
-            stroke.point.x,
-            stroke.point.y,
-            stroke.size / 2.0,
-            stroke.color,
-        );
-        draw_line(
-            prev_point.x,
-            prev_point.y,
-            stroke.point.x,
-            stroke.point.y,
-            stroke.size,
-            stroke.color,
-        );
-        prev_point = &stroke.point;
     }
 }
