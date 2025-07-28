@@ -1,4 +1,6 @@
-use egui_macroquad::egui::{self, Slider};
+use egui_macroquad::egui::{
+    self, Color32, FontId, RichText, Slider, TextFormat, WidgetText, text::LayoutJob,
+};
 use macroquad::time::get_fps;
 
 use crate::drawing::DrawState;
@@ -54,15 +56,78 @@ pub fn render_ui(draw_state: &mut DrawState) {
                     }
 
                     ui.menu_button("Options", |ui| {
-                        if ui.button("Undo     Ctrl+Z").clicked() {
+                        let mut job = LayoutJob::default();
+
+                        job.append(
+                            "Undo",
+                            0.0,
+                            TextFormat {
+                                color: Color32::WHITE,
+                                ..Default::default()
+                            },
+                        );
+
+                        job.append(
+                            "Ctrl+Z",
+                            30.0,
+                            TextFormat {
+                                color: Color32::GRAY,
+                                ..Default::default()
+                            },
+                        );
+
+                        let test_label: WidgetText = WidgetText::from(job);
+                        if ui.button(test_label).clicked() {
                             draw_state.undo();
                         }
 
-                        if ui.button("Redo     Ctrl+X").clicked() {
+                        let mut job = LayoutJob::default();
+
+                        job.append(
+                            "Redo",
+                            0.0,
+                            TextFormat {
+                                color: Color32::WHITE,
+                                ..Default::default()
+                            },
+                        );
+
+                        job.append(
+                            "Ctrl+X",
+                            30.0,
+                            TextFormat {
+                                color: Color32::GRAY,
+                                ..Default::default()
+                            },
+                        );
+
+                        let test_label: WidgetText = WidgetText::from(job);
+                        if ui.button(test_label).clicked() {
                             draw_state.redo();
                         }
 
-                        if ui.button("Clear     C").clicked() {
+                        let mut job = LayoutJob::default();
+
+                        job.append(
+                            "Clear",
+                            0.0,
+                            TextFormat {
+                                color: Color32::WHITE,
+                                ..Default::default()
+                            },
+                        );
+
+                        job.append(
+                            "C",
+                            30.0,
+                            TextFormat {
+                                color: Color32::GRAY,
+                                ..Default::default()
+                            },
+                        );
+
+                        let test_label: WidgetText = WidgetText::from(job);
+                        if ui.button(test_label).clicked() {
                             draw_state.clear_canvas();
                         }
                     });
@@ -74,4 +139,30 @@ pub fn render_ui(draw_state: &mut DrawState) {
                 });
             });
     });
+}
+
+fn menu_button(ui: &mut egui::Ui, label: &str, shortcut: &str) -> LayoutJob {
+    let mut job = menu_button(ui, "Undo", "Ctrl+Z");
+
+    job.append(
+        label,
+        10.0,
+        TextFormat {
+            font_id: FontId::proportional(16.0),
+            color: Color32::WHITE,
+            ..Default::default()
+        },
+    );
+
+    job.append(
+        shortcut,
+        10.0,
+        TextFormat {
+            font_id: FontId::proportional(16.0),
+            color: Color32::WHITE,
+            ..Default::default()
+        },
+    );
+
+    job
 }

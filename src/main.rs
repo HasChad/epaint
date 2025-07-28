@@ -51,7 +51,15 @@ async fn main() {
         render_ui(&mut draw_state);
 
         // MARK: DRAW
-        draw_rectangle_lines(-250.0, -250.0, 500.0, 500.0, 5.0, YELLOW);
+        let mut cross_color: Color = WHITE;
+
+        cross_color.r = 1.0 - draw_state.bg_color.r;
+        cross_color.g = 1.0 - draw_state.bg_color.g;
+        cross_color.b = 1.0 - draw_state.bg_color.b;
+        cross_color.a = 1.0;
+
+        draw_line(0.0, 5.0, 0.0, -5.0, 2.0, cross_color);
+        draw_line(5.0, 0.0, -5.0, 0.0, 2.0, cross_color);
 
         // FIXME: need a new function to render smooth curved lines. probably splines
         draw_state.line_render();
