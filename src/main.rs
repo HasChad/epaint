@@ -1,4 +1,5 @@
 // #![windows_subsystem = "windows"]
+
 use macroquad::prelude::*;
 
 mod app_settings;

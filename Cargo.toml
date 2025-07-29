@@ -6,3 +6,4 @@ edition = "2024"
 [dependencies]
 macroquad = "0.4.14"
 egui-macroquad = "0.17.3"
+lyon = "1.0.1"
