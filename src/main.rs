@@ -62,7 +62,6 @@ async fn main() {
         draw_line(0.0, 5.0, 0.0, -5.0, 2.0, cross_color);
         draw_line(5.0, 0.0, -5.0, 0.0, 2.0, cross_color);
 
-        // FIXME: need a new function to render smooth curved lines. probably splines
         draw_state.line_render();
 
         egui_macroquad::draw();

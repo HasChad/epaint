@@ -120,14 +120,32 @@ impl DrawState {
             let lops = LyonOps::new(&path, line.color, line.size);
 
             // verts = 1500, indies = verts * 3 - 6
+            info!("verts = {}", lops.vertices.len());
+            info!("indie = {}", lops.geometry.indices.len());
 
-            let mesh = Mesh {
-                vertices: lops.vertices,
-                indices: lops.geometry.indices.clone(),
-                texture: None,
-            };
+            if lops.vertices.len() > 1500 {
+                let verts: Vec<Vertex> = lops.vertices[0..1500].iter().cloned().collect();
+                let indis: Vec<u16> = lops.geometry.indices[0..(1500 * 3 - 6)]
+                    .iter()
+                    .cloned()
+                    .collect();
 
-            draw_mesh(&mesh);
+                let mesh = Mesh {
+                    vertices: verts,
+                    indices: indis,
+                    texture: None,
+                };
+
+                draw_mesh(&mesh);
+            } else {
+                let mesh = Mesh {
+                    vertices: lops.vertices,
+                    indices: lops.geometry.indices,
+                    texture: None,
+                };
+
+                draw_mesh(&mesh);
+            }
         }
     }
 }
