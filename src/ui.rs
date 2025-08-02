@@ -1,7 +1,7 @@
-use egui_macroquad::egui::{self, Pos2, Rect, Slider, Vec2};
+use egui_macroquad::egui::{self, Align2, Button, Slider, Vec2};
 use macroquad::time::get_fps;
 
-use crate::drawing::DrawState;
+use crate::drawing::*;
 
 pub const TOP_BAR_SIZE: f32 = 25.0;
 
@@ -9,30 +9,51 @@ pub fn render_ui(draw_state: &mut DrawState) {
     egui_macroquad::ui(|egui_ctx| {
         draw_state.can_draw = !egui_ctx.wants_pointer_input();
 
-        let button_rect =
-            egui::Rect::from_min_size(Pos2::new(100.0, 100.0), Vec2::new(100.0, 100.0));
+        let button_size = Vec2::new(60.0, 20.0);
 
         egui::Window::new("Options")
             .open(&mut true)
             .resizable(false)
             .default_width(50.0)
+            .anchor(Align2::LEFT_TOP, (10.0, TOP_BAR_SIZE + 10.0))
             .collapsible(false)
             .show(egui_ctx, |ui| {
                 egui::Grid::new("my_grid")
                     .num_columns(2)
-                    .spacing([10.0, 5.0])
+                    .spacing([5.0, 5.0])
                     .striped(true)
                     .show(ui, |ui| {
-                        ui.button("Brush");
-                        ui.button("Arrow");
+                        if ui.add(Button::new("Brush").min_size(button_size)).clicked() {
+                            draw_state.style = DrawStyle::Brush;
+                        }
+                        if ui.add(Button::new("Line").min_size(button_size)).clicked() {
+                            draw_state.style = DrawStyle::Line;
+                        }
                         ui.end_row();
 
-                        ui.button("Rect");
-                        ui.button("Rect O");
+                        if ui.add(Button::new("Rect").min_size(button_size)).clicked() {
+                            draw_state.style = DrawStyle::Rect;
+                        }
+                        if ui
+                            .add(Button::new("Rect O").min_size(button_size))
+                            .clicked()
+                        {
+                            draw_state.style = DrawStyle::RectO;
+                        }
                         ui.end_row();
 
-                        ui.button("Circle");
-                        ui.button("Circle O");
+                        if ui
+                            .add(Button::new("Circle").min_size(button_size))
+                            .clicked()
+                        {
+                            draw_state.style = DrawStyle::Circle;
+                        }
+                        if ui
+                            .add(Button::new("Circle O").min_size(button_size))
+                            .clicked()
+                        {
+                            draw_state.style = DrawStyle::CircleO;
+                        }
                         ui.end_row();
                     })
             });
@@ -80,20 +101,6 @@ pub fn render_ui(draw_state: &mut DrawState) {
                         draw_state.bg_color.g = egui_color.g() as f32 / 255.0;
                         draw_state.bg_color.b = egui_color.b() as f32 / 255.0;
                     }
-
-                    ui.menu_button("Options", |ui| {
-                        if ui.button("Undo      Ctrl+Z").clicked() {
-                            draw_state.undo();
-                        }
-
-                        if ui.button("Redo      Ctrl+X").clicked() {
-                            draw_state.redo();
-                        }
-
-                        if ui.button("Clear     C").clicked() {
-                            draw_state.clear_canvas();
-                        }
-                    });
 
                     ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                         ui.label(format!("fps: {:.0}", get_fps()));

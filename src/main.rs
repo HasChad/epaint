@@ -31,17 +31,7 @@ async fn main() {
             draw_state.drawing(world_mpos);
         }
 
-        if is_key_pressed(KeyCode::Z) && is_key_down(KeyCode::LeftControl) {
-            draw_state.undo();
-        }
-
-        if is_key_pressed(KeyCode::X) && is_key_down(KeyCode::LeftControl) {
-            draw_state.redo();
-        }
-
-        if is_key_pressed(KeyCode::C) {
-            draw_state.clear_canvas();
-        }
+        draw_state.inputs();
 
         // ! draw
         clear_background(draw_state.bg_color);

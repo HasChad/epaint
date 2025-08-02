@@ -12,7 +12,18 @@ pub struct Line {
     pub size: f32,
 }
 
+pub enum DrawStyle {
+    Brush,
+    Line,
+    Rect,
+    RectO,
+    Circle,
+    CircleO,
+    Arrow,
+}
+
 pub struct DrawState {
+    pub style: DrawStyle,
     pub lines: Vec<Line>,
     pub redo_save: Vec<Line>,
     pub current_line: Vec<Vec2>,
@@ -25,6 +36,7 @@ pub struct DrawState {
 impl DrawState {
     pub fn new() -> Self {
         DrawState {
+            style: DrawStyle::Brush,
             lines: vec![],
             redo_save: vec![],
             current_line: vec![],
@@ -41,6 +53,9 @@ impl DrawState {
                 x: mouse_pos.x,
                 y: mouse_pos.y,
             });
+
+            // self.current_line.push(Vec2::new(-100.0, 0.0));
+            // self.current_line.push(Vec2::new(100.0, 0.0));
         };
 
         if is_mouse_button_down(MouseButton::Left) {
@@ -68,7 +83,21 @@ impl DrawState {
         }
     }
 
-    pub fn undo(self: &mut Self) {
+    pub fn inputs(self: &mut Self) {
+        if is_key_pressed(KeyCode::Z) && is_key_down(KeyCode::LeftControl) {
+            self.undo();
+        }
+
+        if is_key_pressed(KeyCode::X) && is_key_down(KeyCode::LeftControl) {
+            self.redo();
+        }
+
+        if is_key_pressed(KeyCode::C) {
+            self.clear_canvas();
+        }
+    }
+
+    fn undo(self: &mut Self) {
         if self.lines.len() > 0 {
             self.redo_save
                 .push(self.lines[self.lines.len() - 1].clone());
@@ -77,7 +106,7 @@ impl DrawState {
         }
     }
 
-    pub fn redo(self: &mut Self) {
+    fn redo(self: &mut Self) {
         if self.redo_save.len() > 0 {
             self.lines
                 .push(self.redo_save[self.redo_save.len() - 1].clone());
@@ -86,7 +115,7 @@ impl DrawState {
         }
     }
 
-    pub fn clear_canvas(self: &mut Self) {
+    fn clear_canvas(self: &mut Self) {
         self.lines.clear();
         self.redo_save.clear();
     }
@@ -95,9 +124,8 @@ impl DrawState {
         let raw_points: Vec<Vec2> = self.current_line.clone();
         let filtered = remove_nearby_points(&raw_points, 2.0);
         let filtered2 = remove_colinear_points(&filtered, 0.05); // ~3 degrees
-        let final_points = smooth_points(&filtered2, 0.05, 3);
-
-        info!("final = {}", final_points.len());
+        let filtered3 = smooth_points(&filtered2, 0.2, 3);
+        let final_points = remove_colinear_points(&filtered3, 0.05); // ~3 degrees
 
         self.current_line = final_points;
     }
