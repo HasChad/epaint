@@ -1,16 +1,19 @@
 use lyon::math::point;
-use lyon::path::{LineCap, LineJoin, Path};
-use lyon::tessellation::{
-    BuffersBuilder, StrokeOptions, StrokeTessellator, StrokeVertex, VertexBuffers,
-};
+use lyon::path::Path;
 use macroquad::prelude::*;
+
+use crate::line_smoothing::*;
+use crate::lyon_ops::*;
 
 #[derive(Clone)]
 pub struct Line {
     pub points: Vec<Vec2>,
     pub color: Color,
     pub size: f32,
+    pub style: DrawStyle,
 }
+
+#[derive(Clone, Copy)]
 
 pub enum DrawStyle {
     Brush,
@@ -77,6 +80,7 @@ impl DrawState {
                 points: self.current_line.clone(),
                 color: self.brush_color,
                 size: self.brush_size,
+                style: self.style,
             });
 
             self.current_line = vec![];
@@ -164,7 +168,7 @@ impl DrawState {
 
             let path = builder.build();
 
-            let lops = LyonOps::new(&path, self.brush_color, self.brush_size);
+            let lops = LyonOpsLine::new(&path, self.brush_color, self.brush_size);
 
             let mesh = Mesh {
                 vertices: lops.vertices,
@@ -211,7 +215,7 @@ impl DrawState {
 
                 let path = builder.build();
 
-                let lops = LyonOps::new(&path, line.color, line.size);
+                let lops = LyonOpsLine::new(&path, line.color, line.size);
 
                 let mesh = Mesh {
                     vertices: lops.vertices,
@@ -223,107 +227,4 @@ impl DrawState {
             }
         }
     }
-}
-
-struct LyonOps {
-    geometry: VertexBuffers<[f32; 2], u16>,
-    vertices: Vec<Vertex>,
-}
-
-impl LyonOps {
-    fn new(path: &Path, color: Color, width: f32) -> Self {
-        // Tessellate into triangles
-        let mut geometry: VertexBuffers<[f32; 2], u16> = VertexBuffers::new();
-        let mut tessellator = StrokeTessellator::new();
-
-        tessellator
-            .tessellate_path(
-                path,
-                &StrokeOptions::default()
-                    .with_line_width(width)
-                    .with_line_cap(LineCap::Round)
-                    .with_line_join(LineJoin::Round),
-                &mut BuffersBuilder::new(&mut geometry, |vertex: StrokeVertex| {
-                    vertex.position().to_array()
-                }),
-            )
-            .unwrap();
-
-        // Convert into Macroquad Mesh
-        let vertices: Vec<Vertex> = geometry
-            .vertices
-            .iter()
-            .map(|[x, y]| Vertex {
-                position: Vec3::new(*x, *y, 0.0),
-                uv: Vec2::ZERO,
-                color: color.into(),
-                normal: Vec4::ZERO,
-            })
-            .collect();
-
-        LyonOps { geometry, vertices }
-    }
-}
-
-fn remove_nearby_points(points: &Vec<Vec2>, min_distance: f32) -> Vec<Vec2> {
-    let mut cleaned = Vec::new();
-
-    for i in 0..points.len() {
-        let p: Vec2 = points[i];
-
-        if cleaned
-            .last()
-            .map_or(true, |last: &Vec2| last.distance(p) >= min_distance)
-        {
-            cleaned.push(p);
-        }
-    }
-
-    cleaned
-}
-
-fn is_colinear(a: Vec2, b: Vec2, c: Vec2, tolerance: f32) -> bool {
-    let ab = b - a;
-    let bc = c - b;
-    let angle = ab.angle_between(bc).abs();
-    angle < tolerance
-}
-
-fn remove_colinear_points(points: &Vec<Vec2>, angle_tolerance: f32) -> Vec<Vec2> {
-    if points.len() < 3 {
-        return points.clone();
-    }
-
-    let mut cleaned = vec![points[0]];
-    for i in 1..points.len() - 1 {
-        let prev = cleaned.last().unwrap();
-        let curr = points[i];
-        let next = points[i + 1];
-
-        if !is_colinear(*prev, curr, next, angle_tolerance) {
-            cleaned.push(curr);
-        }
-    }
-    cleaned.push(*points.last().unwrap());
-    cleaned
-}
-
-fn smooth_points(points: &[Vec2], strength: f32, iterations: usize) -> Vec<Vec2> {
-    let mut result = points.to_vec();
-
-    for _ in 0..iterations {
-        let mut new_points = result.clone();
-        for i in 1..result.len() - 1 {
-            let prev = result[i - 1];
-            let curr = result[i];
-            let next = result[i + 1];
-
-            // Average neighbors and move current point slightly toward the average
-            let target = (prev + next) * 0.5;
-            new_points[i] = curr.lerp(target, strength);
-        }
-        result = new_points;
-    }
-
-    result
 }

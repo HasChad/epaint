@@ -4,6 +4,8 @@ use macroquad::prelude::*;
 
 mod app_settings;
 mod drawing;
+mod line_smoothing;
+mod lyon_ops;
 mod ui;
 
 use app_settings::*;
