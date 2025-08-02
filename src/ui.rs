@@ -1,4 +1,4 @@
-use egui_macroquad::egui::{self, Slider};
+use egui_macroquad::egui::{self, Pos2, Rect, Slider, Vec2};
 use macroquad::time::get_fps;
 
 use crate::drawing::DrawState;
@@ -9,6 +9,34 @@ pub fn render_ui(draw_state: &mut DrawState) {
     egui_macroquad::ui(|egui_ctx| {
         draw_state.can_draw = !egui_ctx.wants_pointer_input();
 
+        let button_rect =
+            egui::Rect::from_min_size(Pos2::new(100.0, 100.0), Vec2::new(100.0, 100.0));
+
+        egui::Window::new("Options")
+            .open(&mut true)
+            .resizable(false)
+            .default_width(50.0)
+            .collapsible(false)
+            .show(egui_ctx, |ui| {
+                egui::Grid::new("my_grid")
+                    .num_columns(2)
+                    .spacing([10.0, 5.0])
+                    .striped(true)
+                    .show(ui, |ui| {
+                        ui.button("Brush");
+                        ui.button("Arrow");
+                        ui.end_row();
+
+                        ui.button("Rect");
+                        ui.button("Rect O");
+                        ui.end_row();
+
+                        ui.button("Circle");
+                        ui.button("Circle O");
+                        ui.end_row();
+                    })
+            });
+
         egui::TopBottomPanel::top("menu_bar")
             .exact_height(TOP_BAR_SIZE)
             .show_separator_line(true)
@@ -16,7 +44,7 @@ pub fn render_ui(draw_state: &mut DrawState) {
                 egui::menu::bar(ui, |ui| {
                     ui.label("Brush Size:");
                     ui.add(
-                        Slider::new(&mut draw_state.brush_size, 1.0..=10.0)
+                        Slider::new(&mut draw_state.brush_size, 1.0..=30.0)
                             .trailing_fill(true)
                             .step_by(0.1),
                     );

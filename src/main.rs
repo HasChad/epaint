@@ -22,13 +22,12 @@ async fn main() {
 
     loop {
         camera_fixer(&mut camera, &mut zoomer);
+        let world_mpos = camera.screen_to_world(Vec2 {
+            x: mouse_position().0,
+            y: mouse_position().1,
+        });
 
         if draw_state.can_draw && mouse_position().1 > TOP_BAR_SIZE {
-            let world_mpos = camera.screen_to_world(Vec2 {
-                x: mouse_position().0,
-                y: mouse_position().1,
-            });
-
             draw_state.drawing(world_mpos);
         }
 
@@ -52,18 +51,17 @@ async fn main() {
         render_ui(&mut draw_state);
 
         // MARK: DRAW
-        let mut cross_color: Color = WHITE;
-
-        cross_color.r = 1.0 - draw_state.bg_color.r;
-        cross_color.g = 1.0 - draw_state.bg_color.g;
-        cross_color.b = 1.0 - draw_state.bg_color.b;
-        cross_color.a = 1.0;
-
-        draw_line(0.0, 5.0, 0.0, -5.0, 2.0, cross_color);
-        draw_line(5.0, 0.0, -5.0, 0.0, 2.0, cross_color);
-
         draw_state.line_render();
+        draw_state.current_line_render();
 
+        draw_circle(
+            world_mpos.x,
+            world_mpos.y,
+            draw_state.brush_size / 2.0,
+            draw_state.brush_color,
+        );
+
+        // MARK: DRAW UI
         egui_macroquad::draw();
 
         next_frame().await

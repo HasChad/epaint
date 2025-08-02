@@ -29,7 +29,7 @@ impl DrawState {
             redo_save: vec![],
             current_line: vec![],
             brush_color: WHITE,
-            brush_size: 3.0,
+            brush_size: 5.0,
             bg_color: BLACK,
             can_draw: true,
         }
@@ -41,12 +41,6 @@ impl DrawState {
                 x: mouse_pos.x,
                 y: mouse_pos.y,
             });
-
-            self.lines.push(Line {
-                points: self.current_line.clone(),
-                color: self.brush_color,
-                size: self.brush_size,
-            });
         };
 
         if is_mouse_button_down(MouseButton::Left) {
@@ -56,15 +50,20 @@ impl DrawState {
                     y: mouse_pos.y,
                 });
             }
-
-            let count = self.lines.len() - 1;
-            self.lines[count].points = self.current_line.clone();
         }
 
         if is_mouse_button_released(MouseButton::Left) {
             if self.current_line.len() == 1 {
                 self.lines.pop();
             }
+            self.line_smoothing();
+
+            self.lines.push(Line {
+                points: self.current_line.clone(),
+                color: self.brush_color,
+                size: self.brush_size,
+            });
+
             self.current_line = vec![];
         }
     }
@@ -92,24 +91,44 @@ impl DrawState {
         self.redo_save.clear();
     }
 
-    pub fn line_render(self: &Self) {
-        for line in self.lines.iter() {
+    fn line_smoothing(self: &mut Self) {
+        let raw_points: Vec<Vec2> = self.current_line.clone();
+        let filtered = remove_nearby_points(&raw_points, 2.0);
+        let filtered2 = remove_colinear_points(&filtered, 0.05); // ~3 degrees
+        let final_points = smooth_points(&filtered2, 0.05, 3);
+
+        info!("final = {}", final_points.len());
+
+        self.current_line = final_points;
+    }
+
+    pub fn current_line_render(self: &Self) {
+        let mut prev_last: Option<&Vec2> = None;
+
+        for line_chunk in self.current_line.chunks(350) {
             let mut builder = Path::builder();
             let mut raw_points = vec![];
 
-            for stroke in line.points.iter() {
+            if let Some(prev) = prev_last {
+                raw_points.push(point(prev.x, prev.y));
+            }
+
+            for stroke in line_chunk.iter() {
                 raw_points.push(point(stroke.x, stroke.y));
             }
 
+            prev_last = line_chunk.last();
+
             if raw_points.len() > 2 {
                 for (i, point) in raw_points.iter().enumerate() {
-                    if i != raw_points.len() - 1 {
-                        if i == 0 {
-                            builder.begin(*point);
-                        } else {
-                            builder.line_to(*point);
-                        }
-                    } else {
+                    if i == 0 {
+                        builder.begin(*point);
+                        continue;
+                    }
+
+                    builder.line_to(*point);
+
+                    if i == raw_points.len() - 1 {
                         builder.end(false);
                     }
                 }
@@ -117,27 +136,55 @@ impl DrawState {
 
             let path = builder.build();
 
-            let lops = LyonOps::new(&path, line.color, line.size);
+            let lops = LyonOps::new(&path, self.brush_color, self.brush_size);
 
-            // verts = 1500, indies = verts * 3 - 6
-            info!("verts = {}", lops.vertices.len());
-            info!("indie = {}", lops.geometry.indices.len());
+            let mesh = Mesh {
+                vertices: lops.vertices,
+                indices: lops.geometry.indices,
+                texture: None,
+            };
 
-            if lops.vertices.len() > 1500 {
-                let verts: Vec<Vertex> = lops.vertices[0..1500].iter().cloned().collect();
-                let indis: Vec<u16> = lops.geometry.indices[0..(1500 * 3 - 6)]
-                    .iter()
-                    .cloned()
-                    .collect();
+            draw_mesh(&mesh);
+        }
+    }
 
-                let mesh = Mesh {
-                    vertices: verts,
-                    indices: indis,
-                    texture: None,
-                };
+    pub fn line_render(self: &Self) {
+        for line in self.lines.iter() {
+            let mut prev_last: Option<&Vec2> = None;
 
-                draw_mesh(&mesh);
-            } else {
+            for line_chunk in line.points.chunks(350) {
+                let mut builder = Path::builder();
+                let mut raw_points = vec![];
+
+                if let Some(prev) = prev_last {
+                    raw_points.push(point(prev.x, prev.y));
+                }
+
+                for stroke in line_chunk.iter() {
+                    raw_points.push(point(stroke.x, stroke.y));
+                }
+
+                prev_last = line_chunk.last();
+
+                if raw_points.len() > 2 {
+                    for (i, point) in raw_points.iter().enumerate() {
+                        if i == 0 {
+                            builder.begin(*point);
+                            continue;
+                        }
+
+                        builder.line_to(*point);
+
+                        if i == raw_points.len() - 1 {
+                            builder.end(false);
+                        }
+                    }
+                }
+
+                let path = builder.build();
+
+                let lops = LyonOps::new(&path, line.color, line.size);
+
                 let mesh = Mesh {
                     vertices: lops.vertices,
                     indices: lops.geometry.indices,
@@ -188,4 +235,67 @@ impl LyonOps {
 
         LyonOps { geometry, vertices }
     }
+}
+
+fn remove_nearby_points(points: &Vec<Vec2>, min_distance: f32) -> Vec<Vec2> {
+    let mut cleaned = Vec::new();
+
+    for i in 0..points.len() {
+        let p: Vec2 = points[i];
+
+        if cleaned
+            .last()
+            .map_or(true, |last: &Vec2| last.distance(p) >= min_distance)
+        {
+            cleaned.push(p);
+        }
+    }
+
+    cleaned
+}
+
+fn is_colinear(a: Vec2, b: Vec2, c: Vec2, tolerance: f32) -> bool {
+    let ab = b - a;
+    let bc = c - b;
+    let angle = ab.angle_between(bc).abs();
+    angle < tolerance
+}
+
+fn remove_colinear_points(points: &Vec<Vec2>, angle_tolerance: f32) -> Vec<Vec2> {
+    if points.len() < 3 {
+        return points.clone();
+    }
+
+    let mut cleaned = vec![points[0]];
+    for i in 1..points.len() - 1 {
+        let prev = cleaned.last().unwrap();
+        let curr = points[i];
+        let next = points[i + 1];
+
+        if !is_colinear(*prev, curr, next, angle_tolerance) {
+            cleaned.push(curr);
+        }
+    }
+    cleaned.push(*points.last().unwrap());
+    cleaned
+}
+
+fn smooth_points(points: &[Vec2], strength: f32, iterations: usize) -> Vec<Vec2> {
+    let mut result = points.to_vec();
+
+    for _ in 0..iterations {
+        let mut new_points = result.clone();
+        for i in 1..result.len() - 1 {
+            let prev = result[i - 1];
+            let curr = result[i];
+            let next = result[i + 1];
+
+            // Average neighbors and move current point slightly toward the average
+            let target = (prev + next) * 0.5;
+            new_points[i] = curr.lerp(target, strength);
+        }
+        result = new_points;
+    }
+
+    result
 }
