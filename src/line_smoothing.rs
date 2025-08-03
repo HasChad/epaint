@@ -1,9 +1,13 @@
 use macroquad::prelude::*;
 
 pub fn remove_nearby_points(points: &Vec<Vec2>, min_distance: f32) -> Vec<Vec2> {
-    let mut cleaned = Vec::new();
+    if points.len() < 3 {
+        return points.clone();
+    }
 
-    for i in 0..points.len() {
+    let mut cleaned = vec![points[0]];
+
+    for i in 1..points.len() - 1 {
         let p: Vec2 = points[i];
 
         if cleaned
@@ -13,6 +17,8 @@ pub fn remove_nearby_points(points: &Vec<Vec2>, min_distance: f32) -> Vec<Vec2> 
             cleaned.push(p);
         }
     }
+
+    cleaned.push(*points.last().unwrap());
 
     cleaned
 }
