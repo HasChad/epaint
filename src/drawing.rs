@@ -1,5 +1,3 @@
-use std::os::raw;
-
 use lyon::math::point;
 use lyon::path::Path;
 use macroquad::prelude::*;
@@ -11,12 +9,13 @@ use crate::lyon_ops::*;
 
 pub enum DrawStyle {
     Brush,
+    SBrush,
     Line,
+    Arrow,
     Rect,
     RectO,
     Circle,
     CircleO,
-    Arrow,
 }
 
 pub struct DrawState {
@@ -135,18 +134,15 @@ impl DrawState {
 
             prev_last = line_chunk.last();
 
-            if raw_points.len() > 2 {
-                for (i, point) in raw_points.iter().enumerate() {
-                    if i == 0 {
-                        builder.begin(*point);
-                        continue;
-                    }
-
+            for (i, point) in raw_points.iter().enumerate() {
+                if i == 0 {
+                    builder.begin(*point);
+                } else {
                     builder.line_to(*point);
+                }
 
-                    if i == raw_points.len() - 1 {
-                        builder.end(false);
-                    }
+                if i == raw_points.len() - 1 {
+                    builder.end(false);
                 }
             }
 

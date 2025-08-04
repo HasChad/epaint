@@ -9,49 +9,46 @@ pub fn render_ui(draw_state: &mut DrawState) {
     egui_macroquad::ui(|egui_ctx| {
         draw_state.can_draw = !egui_ctx.wants_pointer_input();
 
-        let button_size = Vec2::new(60.0, 20.0);
+        let button_size = Vec2::new(25.0, 25.0);
 
         egui::Window::new("Options")
-            .open(&mut true)
+            .title_bar(false)
             .resizable(false)
-            .default_width(50.0)
             .anchor(Align2::LEFT_TOP, (10.0, TOP_BAR_SIZE + 10.0))
-            .collapsible(false)
             .show(egui_ctx, |ui| {
                 egui::Grid::new("my_grid")
                     .num_columns(2)
                     .spacing([5.0, 5.0])
                     .striped(true)
                     .show(ui, |ui| {
-                        if ui.add(Button::new("Brush").min_size(button_size)).clicked() {
+                        if ui.add(Button::new("B").min_size(button_size)).clicked() {
                             draw_state.style = DrawStyle::Brush;
                         }
-                        if ui.add(Button::new("Line").min_size(button_size)).clicked() {
-                            draw_state.style = DrawStyle::Line;
+                        if ui.add(Button::new("SB").min_size(button_size)).clicked() {
+                            draw_state.style = DrawStyle::SBrush;
                         }
                         ui.end_row();
 
-                        if ui.add(Button::new("Rect").min_size(button_size)).clicked() {
+                        if ui.add(Button::new("L").min_size(button_size)).clicked() {
+                            draw_state.style = DrawStyle::Line;
+                        }
+                        if ui.add(Button::new("A").min_size(button_size)).clicked() {
+                            draw_state.style = DrawStyle::Arrow;
+                        }
+                        ui.end_row();
+
+                        if ui.add(Button::new("R").min_size(button_size)).clicked() {
                             draw_state.style = DrawStyle::Rect;
                         }
-                        if ui
-                            .add(Button::new("Rect O").min_size(button_size))
-                            .clicked()
-                        {
+                        if ui.add(Button::new("RO").min_size(button_size)).clicked() {
                             draw_state.style = DrawStyle::RectO;
                         }
                         ui.end_row();
 
-                        if ui
-                            .add(Button::new("Circle").min_size(button_size))
-                            .clicked()
-                        {
+                        if ui.add(Button::new("C").min_size(button_size)).clicked() {
                             draw_state.style = DrawStyle::Circle;
                         }
-                        if ui
-                            .add(Button::new("Circle O").min_size(button_size))
-                            .clicked()
-                        {
+                        if ui.add(Button::new("CO").min_size(button_size)).clicked() {
                             draw_state.style = DrawStyle::CircleO;
                         }
                         ui.end_row();
