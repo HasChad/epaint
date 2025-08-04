@@ -1,7 +1,7 @@
 use egui_macroquad::egui::{self, Align2, Button, Slider, Vec2};
 use macroquad::time::get_fps;
 
-use crate::drawing::*;
+use crate::drawing::{DrawState, DrawStyle};
 
 pub const TOP_BAR_SIZE: f32 = 25.0;
 

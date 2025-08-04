@@ -1,5 +1,16 @@
 use macroquad::prelude::*;
 
+pub fn line_smoothing(points: &mut Vec<Vec2>) {
+    let raw_points: Vec<Vec2> = points.clone();
+
+    let filtered = remove_nearby_points(&raw_points, 2.0);
+    let filtered2 = remove_colinear_points(&filtered, 0.05); // ~3 degrees
+    let filtered3 = smooth_points(&filtered2, 0.2, 3);
+    let final_points = remove_colinear_points(&filtered3, 0.05); // ~3 degrees
+
+    *points = final_points;
+}
+
 pub fn remove_nearby_points(points: &Vec<Vec2>, min_distance: f32) -> Vec<Vec2> {
     if points.len() < 3 {
         return points.clone();

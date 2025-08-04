@@ -4,12 +4,10 @@ use macroquad::prelude::*;
 
 mod app_settings;
 mod drawing;
-mod line_smoothing;
-mod lyon_ops;
 mod ui;
 
+use crate::drawing::DrawState;
 use app_settings::*;
-use drawing::*;
 use ui::*;
 
 #[macroquad::main(window_conf)]
