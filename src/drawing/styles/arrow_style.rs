@@ -34,25 +34,21 @@ impl Drawable for ArrowStyle {
 
     fn draw_preview(&self, state: &DrawState) {
         if state.current_line.len() == 2 {
-            let mut builder = Path::builder();
-
             let p1 = state.current_line[0];
             let p2 = state.current_line[1];
+            let size = state.brush_size;
 
-            let mut dir = p2 - p1;
-
-            if dir == Vec2::ZERO {
-                dir = p1;
-            }
+            let dir = if p2 == p1 { p1 } else { p2 - p1 };
 
             let norm = dir.normalize();
-
-            let mid = p2 - (norm * 30.0);
+            let mid = p2 - (norm * 5.0 * size);
 
             let normal = Vec2::new(-dir.y, dir.x).normalize();
 
-            let end1 = mid + normal * 10.0;
-            let end2 = mid - normal * 10.0;
+            let end1 = mid + normal * 2.0 * size;
+            let end2 = mid - normal * 2.0 * size;
+
+            let mut builder = Path::builder();
 
             builder.begin(point(p1.x, p1.y));
             builder.line_to(point(mid.x, mid.y));
@@ -94,25 +90,21 @@ impl Drawable for ArrowStyle {
     fn mesh(&self, state: &mut DrawState) {
         state.lines.push(vec![]);
 
-        let mut builder = Path::builder();
-
         let p1 = state.current_line[0];
         let p2 = state.current_line[1];
+        let size = state.brush_size;
 
-        let mut dir = p2 - p1;
-
-        if dir == Vec2::ZERO {
-            dir = p1;
-        }
+        let dir = if p2 == p1 { p1 } else { p2 - p1 };
 
         let norm = dir.normalize();
-
-        let mid = p2 - (norm * 30.0);
+        let mid = p2 - (norm * 5.0 * size);
 
         let normal = Vec2::new(-dir.y, dir.x).normalize();
 
-        let end1 = mid + normal * 10.0;
-        let end2 = mid - normal * 10.0;
+        let end1 = mid + normal * 2.0 * size;
+        let end2 = mid - normal * 2.0 * size;
+
+        let mut builder = Path::builder();
 
         builder.begin(point(p1.x, p1.y));
         builder.line_to(point(mid.x, mid.y));

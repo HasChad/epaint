@@ -1,5 +1,5 @@
-use lyon::math::point;
-use lyon::path::Path;
+use lyon::path::{Path, Winding};
+use lyon::{geom::Box2D, math::point};
 use macroquad::prelude::*;
 
 use crate::drawing::{DrawState, Drawable, RectOStyle, lyon_ops::*};
@@ -16,31 +16,12 @@ impl Drawable for RectOStyle {
                 x: mouse_pos.x,
                 y: mouse_pos.y,
             });
-
-            state.current_line.push(Vec2 {
-                x: mouse_pos.x,
-                y: mouse_pos.y,
-            });
-
-            state.current_line.push(Vec2 {
-                x: mouse_pos.x,
-                y: mouse_pos.y,
-            });
         };
 
         if is_mouse_button_down(MouseButton::Left) {
             state.current_line[1] = Vec2 {
-                x: state.current_line[0].x,
-                y: mouse_pos.y,
-            };
-
-            state.current_line[2] = Vec2 {
                 x: mouse_pos.x,
                 y: mouse_pos.y,
-            };
-            state.current_line[3] = Vec2 {
-                x: mouse_pos.x,
-                y: state.current_line[0].y,
             };
         }
 
@@ -52,14 +33,15 @@ impl Drawable for RectOStyle {
     }
 
     fn draw_preview(&self, state: &DrawState) {
-        if state.current_line.len() == 4 {
+        if state.current_line.len() == 2 {
             let mut builder = Path::builder();
 
-            builder.begin(point(state.current_line[0].x, state.current_line[0].y));
-            builder.line_to(point(state.current_line[1].x, state.current_line[1].y));
-            builder.line_to(point(state.current_line[2].x, state.current_line[2].y));
-            builder.line_to(point(state.current_line[3].x, state.current_line[3].y));
-            builder.end(true);
+            let p1 = state.current_line[0];
+            let p2 = state.current_line[1];
+
+            let rect = Box2D::new(point(p1.x, p1.y), point(p2.x, p2.y));
+
+            builder.add_rectangle(&rect, Winding::Positive);
 
             let path = builder.build();
 
@@ -80,11 +62,12 @@ impl Drawable for RectOStyle {
 
         let mut builder = Path::builder();
 
-        builder.begin(point(state.current_line[0].x, state.current_line[0].y));
-        builder.line_to(point(state.current_line[1].x, state.current_line[1].y));
-        builder.line_to(point(state.current_line[2].x, state.current_line[2].y));
-        builder.line_to(point(state.current_line[3].x, state.current_line[3].y));
-        builder.end(true);
+        let p1 = state.current_line[0];
+        let p2 = state.current_line[1];
+
+        let rect = Box2D::new(point(p1.x, p1.y), point(p2.x, p2.y));
+
+        builder.add_rectangle(&rect, Winding::Positive);
 
         let path = builder.build();
 

@@ -1,10 +1,10 @@
+use lyon::math::point;
 use lyon::path::{Path, Winding};
-use lyon::{geom::Box2D, math::point};
 use macroquad::prelude::*;
 
-use crate::drawing::{DrawState, Drawable, RectStyle, lyon_ops::*};
+use crate::drawing::{CircleOStyle, DrawState, Drawable, lyon_ops::*};
 
-impl Drawable for RectStyle {
+impl Drawable for CircleOStyle {
     fn drawing(&self, mouse_pos: Vec2, state: &mut DrawState) {
         if is_mouse_button_pressed(MouseButton::Left) {
             state.current_line.push(Vec2 {
@@ -39,13 +39,14 @@ impl Drawable for RectStyle {
             let p1 = state.current_line[0];
             let p2 = state.current_line[1];
 
-            let rect = Box2D::new(point(p1.x, p1.y), point(p2.x, p2.y));
+            let center = (p1 + p2) * 0.5;
+            let radius = p2.distance(p1) * 0.5;
 
-            builder.add_rectangle(&rect, Winding::Positive);
+            builder.add_circle(point(center.x, center.y), radius, Winding::Positive);
 
             let path = builder.build();
 
-            let lops = LyonOpsFill::new(&path, state.brush_color);
+            let lops = LyonOpsLine::new(&path, state.brush_color, state.brush_size);
 
             let mesh = Mesh {
                 vertices: lops.vertices,
@@ -65,13 +66,14 @@ impl Drawable for RectStyle {
         let p1 = state.current_line[0];
         let p2 = state.current_line[1];
 
-        let rect = Box2D::new(point(p1.x, p1.y), point(p2.x, p2.y));
+        let center = (p1 + p2) * 0.5;
+        let radius = p2.distance(p1) * 0.5;
 
-        builder.add_rectangle(&rect, Winding::Positive);
+        builder.add_circle(point(center.x, center.y), radius, Winding::Positive);
 
         let path = builder.build();
 
-        let lops = LyonOpsFill::new(&path, state.brush_color);
+        let lops = LyonOpsLine::new(&path, state.brush_color, state.brush_size);
 
         let mesh = Mesh {
             vertices: lops.vertices,

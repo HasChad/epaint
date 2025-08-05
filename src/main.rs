@@ -49,7 +49,7 @@ async fn main() {
             world_mpos.y,
             draw_state.brush_size / 2.0,
             1.0,
-            draw_state.brush_color,
+            WHITE,
         );
 
         // MARK: DRAW UI

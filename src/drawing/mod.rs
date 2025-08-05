@@ -4,6 +4,21 @@ pub mod line_smoothing;
 pub mod lyon_ops;
 pub mod styles;
 
+pub struct BrushStyle;
+pub struct SBrushStyle;
+pub struct LineStyle;
+pub struct ArrowStyle;
+pub struct RectStyle;
+pub struct RectOStyle;
+pub struct CircleStyle;
+pub struct CircleOStyle;
+
+pub trait Drawable {
+    fn drawing(&self, mouse_pos: Vec2, state: &mut DrawState);
+    fn draw_preview(&self, state: &DrawState);
+    fn mesh(&self, state: &mut DrawState);
+}
+
 #[derive(Clone, Copy)]
 pub enum DrawStyle {
     Brush,
@@ -16,6 +31,21 @@ pub enum DrawStyle {
     CircleO,
 }
 
+impl DrawStyle {
+    pub fn as_drawable(&self) -> Box<dyn Drawable> {
+        match self {
+            DrawStyle::Brush => Box::new(BrushStyle),
+            DrawStyle::SBrush => Box::new(SBrushStyle),
+            DrawStyle::Line => Box::new(LineStyle),
+            DrawStyle::Arrow => Box::new(ArrowStyle),
+            DrawStyle::Rect => Box::new(RectStyle),
+            DrawStyle::RectO => Box::new(RectOStyle),
+            DrawStyle::Circle => Box::new(CircleStyle),
+            DrawStyle::CircleO => Box::new(CircleOStyle),
+        }
+    }
+}
+
 pub struct DrawState {
     pub style: DrawStyle,
     pub lines: Vec<Vec<Mesh>>,
@@ -25,33 +55,6 @@ pub struct DrawState {
     pub brush_size: f32,
     pub bg_color: Color,
     pub can_draw: bool,
-}
-
-pub struct BrushStyle;
-pub struct LineStyle;
-pub struct ArrowStyle;
-pub struct RectStyle;
-pub struct RectOStyle;
-
-pub trait Drawable {
-    fn drawing(&self, mouse_pos: Vec2, state: &mut DrawState);
-    fn draw_preview(&self, state: &DrawState);
-    fn mesh(&self, state: &mut DrawState);
-}
-
-impl DrawStyle {
-    pub fn as_drawable(&self) -> Box<dyn Drawable> {
-        match self {
-            DrawStyle::Brush => Box::new(BrushStyle),
-            DrawStyle::SBrush => Box::new(BrushStyle),
-            DrawStyle::Line => Box::new(LineStyle),
-            DrawStyle::Arrow => Box::new(ArrowStyle),
-            DrawStyle::RectO => Box::new(RectOStyle),
-            DrawStyle::Rect => Box::new(RectStyle),
-            // ...
-            _ => unimplemented!(),
-        }
-    }
 }
 
 impl DrawState {
