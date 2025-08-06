@@ -6,9 +6,11 @@ mod app_settings;
 mod drawing;
 mod ui;
 
-use crate::drawing::DrawState;
+use crate::{
+    drawing::DrawState,
+    ui::ui::{TOP_BAR_SIZE, UI},
+};
 use app_settings::*;
-use ui::*;
 
 #[macroquad::main(window_conf)]
 async fn main() {
@@ -19,6 +21,7 @@ async fn main() {
     let mut zoomer = ZOOM_DEFAULT;
 
     let mut draw_state = DrawState::new();
+    let mut ui = UI::new();
 
     loop {
         camera_fixer(&mut camera, &mut zoomer);
@@ -38,7 +41,7 @@ async fn main() {
         set_camera(&camera);
 
         // MARK: UI
-        render_ui(&mut draw_state);
+        ui.render_ui(&mut draw_state);
 
         // MARK: DRAW
         draw_state.line_render();

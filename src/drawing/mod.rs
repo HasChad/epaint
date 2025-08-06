@@ -14,6 +14,8 @@ pub struct CircleStyle;
 pub struct CircleOStyle;
 pub struct EllipseStyle;
 pub struct EllipseOStyle;
+pub struct PolyStyle;
+pub struct PolyOStyle;
 
 pub trait Drawable {
     fn drawing(&self, mouse_pos: Vec2, state: &mut DrawState);
@@ -21,7 +23,7 @@ pub trait Drawable {
     fn mesh(&self, state: &mut DrawState);
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq)]
 pub enum DrawStyle {
     Brush,
     SBrush,
@@ -33,6 +35,8 @@ pub enum DrawStyle {
     CircleO,
     Ellipse,
     EllipseO,
+    Poly,
+    PolyO,
 }
 
 impl DrawStyle {
@@ -48,6 +52,8 @@ impl DrawStyle {
             DrawStyle::CircleO => Box::new(CircleOStyle),
             DrawStyle::Ellipse => Box::new(EllipseStyle),
             DrawStyle::EllipseO => Box::new(EllipseOStyle),
+            DrawStyle::Poly => Box::new(PolyStyle),
+            DrawStyle::PolyO => Box::new(PolyOStyle),
         }
     }
 }

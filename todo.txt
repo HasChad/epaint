@@ -1,2 +1,2 @@
-- add elipse and elipse outline style
+- add polygon and polygon outline drawing style
 - add smooth brush style

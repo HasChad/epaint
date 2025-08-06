@@ -5,6 +5,8 @@ pub mod circle_style;
 pub mod ellipse_outline_style;
 pub mod ellipse_style;
 pub mod line_style;
+pub mod poly_outline_style;
+pub mod poly_style;
 pub mod rectangle_outline_style;
 pub mod rectangle_style;
 pub mod smooth_brush_style;
