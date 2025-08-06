@@ -20,15 +20,15 @@ fn set_icon() -> Icon {
     let mut array_big: [u8; 16384] = [0; 16384];
 
     populate_array(
-        load_img(include_bytes!("../icons/icon-16.ico")),
+        load_img(include_bytes!("../icons/icon_16.png")),
         &mut array_small,
     );
     populate_array(
-        load_img(include_bytes!("../icons/icon-32.ico")),
+        load_img(include_bytes!("../icons/icon_32.png")),
         &mut array_medium,
     );
     populate_array(
-        load_img(include_bytes!("../icons/icon-64.ico")),
+        load_img(include_bytes!("../icons/icon_64.png")),
         &mut array_big,
     );
 
@@ -44,7 +44,7 @@ pub fn window_conf() -> Conf {
         window_title: "epaint".into(),
         window_width: 800,
         window_height: 600,
-        icon: None,
+        icon: Some(set_icon()),
         ..Default::default()
     }
 }

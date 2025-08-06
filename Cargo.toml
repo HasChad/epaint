@@ -7,3 +7,6 @@ edition = "2024"
 macroquad = "0.4.14"
 egui-macroquad = "0.17.3"
 lyon = "1.0.1"
+
+[build-dependencies]
+winres = "0.1.12"
