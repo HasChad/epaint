@@ -52,6 +52,14 @@ pub fn render_ui(draw_state: &mut DrawState) {
                             draw_state.style = DrawStyle::CircleO;
                         }
                         ui.end_row();
+
+                        if ui.add(Button::new("E").min_size(button_size)).clicked() {
+                            draw_state.style = DrawStyle::Ellipse;
+                        }
+                        if ui.add(Button::new("EO").min_size(button_size)).clicked() {
+                            draw_state.style = DrawStyle::EllipseO;
+                        }
+                        ui.end_row();
                     })
             });
 

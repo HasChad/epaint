@@ -1,0 +1,2 @@
+- add elipse and elipse outline style
+- add smooth brush style

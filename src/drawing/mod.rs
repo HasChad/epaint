@@ -12,6 +12,8 @@ pub struct RectStyle;
 pub struct RectOStyle;
 pub struct CircleStyle;
 pub struct CircleOStyle;
+pub struct EllipseStyle;
+pub struct EllipseOStyle;
 
 pub trait Drawable {
     fn drawing(&self, mouse_pos: Vec2, state: &mut DrawState);
@@ -29,6 +31,8 @@ pub enum DrawStyle {
     RectO,
     Circle,
     CircleO,
+    Ellipse,
+    EllipseO,
 }
 
 impl DrawStyle {
@@ -42,6 +46,8 @@ impl DrawStyle {
             DrawStyle::RectO => Box::new(RectOStyle),
             DrawStyle::Circle => Box::new(CircleStyle),
             DrawStyle::CircleO => Box::new(CircleOStyle),
+            DrawStyle::Ellipse => Box::new(EllipseStyle),
+            DrawStyle::EllipseO => Box::new(EllipseOStyle),
         }
     }
 }
