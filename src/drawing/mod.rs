@@ -1,6 +1,6 @@
 use macroquad::prelude::*;
 
-use crate::ui::poly_settings::PolySettings;
+use crate::ui::draw_settings::DrawSettings;
 
 pub mod line_smoothing;
 pub mod lyon_ops;
@@ -69,7 +69,7 @@ pub struct DrawState {
     pub brush_size: f32,
     pub bg_color: Color,
     pub can_draw: bool,
-    pub poly_settings: PolySettings,
+    pub poly_settings: DrawSettings,
 }
 
 impl DrawState {
@@ -83,7 +83,7 @@ impl DrawState {
             brush_size: 5.0,
             bg_color: BLACK,
             can_draw: true,
-            poly_settings: PolySettings::new(),
+            poly_settings: DrawSettings::new(),
         }
     }
 

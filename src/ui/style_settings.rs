@@ -1,9 +1,6 @@
 use egui_macroquad::egui::{self, Align2};
 
-use crate::{
-    drawing::{DrawState, DrawStyle},
-    ui::ui::TOP_BAR_SIZE,
-};
+use crate::drawing::{DrawState, DrawStyle};
 
 pub struct StyleSettings;
 
@@ -16,7 +13,7 @@ impl StyleSettings {
         egui::Window::new("Options")
             .title_bar(false)
             .resizable(false)
-            .anchor(Align2::LEFT_TOP, (10.0, TOP_BAR_SIZE + 10.0))
+            .anchor(Align2::RIGHT_TOP, (-5.0, 5.0))
             .show(ctx, |ui| {
                 egui::Grid::new("my_grid")
                     .num_columns(2)

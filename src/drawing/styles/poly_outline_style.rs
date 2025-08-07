@@ -1,6 +1,5 @@
-use lyon::geom::{Angle, Vector};
 use lyon::math::point;
-use lyon::path::{Path, Winding};
+use lyon::path::{Path, Polygon};
 use macroquad::prelude::*;
 
 use crate::drawing::{DrawState, Drawable, PolyOStyle, lyon_ops::*};
@@ -42,16 +41,33 @@ impl Drawable for PolyOStyle {
 
             let center = (p1 + p2) * 0.5;
 
-            builder.add_ellipse(
-                point(center.x, center.y),
-                Vector::new((p2.x - p1.x) / 2.0, (p2.y - p1.y) / 2.0),
-                Angle::zero(),
-                Winding::Positive,
-            );
+            let sides = state.poly_settings.sides;
+            let rot = state.poly_settings.rotation.to_radians();
+
+            let radius = if (p2.x - p1.x).abs() < (p2.y - p1.y).abs() {
+                (p2.x - p1.x).abs() * 0.5
+            } else {
+                (p2.y - p1.y).abs() * 0.5
+            };
+            let mut points = vec![];
+
+            for i in 0..=sides {
+                let rx = (i as f32 / sides as f32 * std::f32::consts::PI * 2. + rot).sin();
+                let ry = -(i as f32 / sides as f32 * std::f32::consts::PI * 2. + rot).cos();
+
+                let poly_p = point(center.x + radius * rx, center.y + radius * ry);
+
+                points.push(poly_p);
+            }
+
+            builder.add_polygon(Polygon {
+                points: &points,
+                closed: true,
+            });
 
             let path = builder.build();
 
-            let lops = LyonOpsFill::new(&path, state.brush_color);
+            let lops = LyonOpsLine::new(&path, state.brush_color, state.brush_size);
 
             let mesh = Mesh {
                 vertices: lops.vertices,
@@ -73,16 +89,33 @@ impl Drawable for PolyOStyle {
 
         let center = (p1 + p2) * 0.5;
 
-        builder.add_ellipse(
-            point(center.x, center.y),
-            Vector::new((p2.x - p1.x) / 2.0, (p2.y - p1.y) / 2.0),
-            Angle::zero(),
-            Winding::Positive,
-        );
+        let sides = state.poly_settings.sides;
+        let rot = state.poly_settings.rotation.to_radians();
+
+        let radius = if (p2.x - p1.x).abs() < (p2.y - p1.y).abs() {
+            (p2.x - p1.x).abs() * 0.5
+        } else {
+            (p2.y - p1.y).abs() * 0.5
+        };
+        let mut points = vec![];
+
+        for i in 0..=sides {
+            let rx = (i as f32 / sides as f32 * std::f32::consts::PI * 2. + rot).sin();
+            let ry = -(i as f32 / sides as f32 * std::f32::consts::PI * 2. + rot).cos();
+
+            let poly_p = point(center.x + radius * rx, center.y + radius * ry);
+
+            points.push(poly_p);
+        }
+
+        builder.add_polygon(Polygon {
+            points: &points,
+            closed: true,
+        });
 
         let path = builder.build();
 
-        let lops = LyonOpsFill::new(&path, state.brush_color);
+        let lops = LyonOpsLine::new(&path, state.brush_color, state.brush_size);
 
         let mesh = Mesh {
             vertices: lops.vertices,
