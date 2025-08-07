@@ -42,10 +42,14 @@ impl Drawable for PolyStyle {
 
             let center = (p1 + p2) * 0.5;
 
-            let sides = 6;
-            let rot = 0.0;
+            let sides = state.poly_settings.sides;
+            let rot = state.poly_settings.rotation.to_radians();
 
-            let radius = p2.distance(p1) * 0.5;
+            let radius = if (p2.x - p1.x).abs() < (p2.y - p1.y).abs() {
+                (p2.x - p1.x).abs() * 0.5
+            } else {
+                (p2.y - p1.y).abs() * 0.5
+            };
             let mut points = vec![];
 
             for i in 0..=sides {
@@ -86,12 +90,25 @@ impl Drawable for PolyStyle {
 
         let center = (p1 + p2) * 0.5;
 
-        builder.add_ellipse(
-            point(center.x, center.y),
-            Vector::new((p2.x - p1.x) / 2.0, (p2.y - p1.y) / 2.0),
-            Angle::zero(),
-            Winding::Positive,
-        );
+        let sides = state.poly_settings.sides;
+        let rot = state.poly_settings.rotation.to_radians();
+
+        let radius = p2.distance(p1) * 0.5;
+        let mut points = vec![];
+
+        for i in 0..=sides {
+            let rx = (i as f32 / sides as f32 * std::f32::consts::PI * 2. + rot).cos();
+            let ry = (i as f32 / sides as f32 * std::f32::consts::PI * 2. + rot).sin();
+
+            let poly_p = point(center.x + radius * rx, center.y + radius * ry);
+
+            points.push(poly_p);
+        }
+
+        builder.add_polygon(Polygon {
+            points: &points,
+            closed: true,
+        });
 
         let path = builder.build();
 

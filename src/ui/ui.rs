@@ -17,8 +17,8 @@ pub struct UI {
 impl UI {
     pub fn new() -> Self {
         let top_bar_settings = TopBarSettings::new();
-        let poly_settings = PolySettings::new();
         let style_settings = StyleSettings::new();
+        let poly_settings = PolySettings::new();
 
         Self {
             top_bar_settings,
@@ -34,9 +34,7 @@ impl UI {
             self.top_bar_settings.ui(ctx, draw_state);
             self.style_settings.ui(ctx, draw_state);
 
-            if draw_state.style == DrawStyle::Poly || draw_state.style == DrawStyle::PolyO {
-                self.poly_settings.ui(ctx);
-            }
+            self.poly_settings.ui(draw_state, ctx);
         })
     }
 }

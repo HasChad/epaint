@@ -5,13 +5,11 @@ use crate::{
     ui::ui::TOP_BAR_SIZE,
 };
 
-pub struct StyleSettings {
-    visible: bool,
-}
+pub struct StyleSettings;
 
 impl StyleSettings {
     pub fn new() -> Self {
-        Self { visible: true }
+        Self
     }
 
     pub fn ui(&mut self, ctx: &egui::Context, state: &mut DrawState) {
