@@ -2,6 +2,7 @@ pub mod arrow_style;
 pub mod brush_style;
 pub mod circle_outline_style;
 pub mod circle_style;
+pub mod curve_style;
 pub mod ellipse_outline_style;
 pub mod ellipse_style;
 pub mod line_style;

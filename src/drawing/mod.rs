@@ -9,6 +9,7 @@ pub mod styles;
 pub struct BrushStyle;
 pub struct SBrushStyle;
 pub struct LineStyle;
+pub struct CurveStyle;
 pub struct ArrowStyle;
 pub struct RectStyle;
 pub struct RectOStyle;
@@ -30,6 +31,7 @@ pub enum DrawStyle {
     Brush,
     SBrush,
     Line,
+    Curve,
     Arrow,
     Rect,
     RectO,
@@ -47,6 +49,7 @@ impl DrawStyle {
             DrawStyle::Brush => Box::new(BrushStyle),
             DrawStyle::SBrush => Box::new(SBrushStyle),
             DrawStyle::Line => Box::new(LineStyle),
+            DrawStyle::Curve => Box::new(CurveStyle),
             DrawStyle::Arrow => Box::new(ArrowStyle),
             DrawStyle::Rect => Box::new(RectStyle),
             DrawStyle::RectO => Box::new(RectOStyle),

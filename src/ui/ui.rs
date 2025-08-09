@@ -3,8 +3,6 @@ use crate::{
     ui::{draw_settings::DrawSettings, style_settings::StyleSettings},
 };
 
-pub const TOP_BAR_SIZE: f32 = 25.0;
-
 pub struct UI {
     draw_settings: DrawSettings,
     style_settings: StyleSettings,

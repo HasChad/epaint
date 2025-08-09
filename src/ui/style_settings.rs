@@ -27,6 +27,8 @@ impl StyleSettings {
                         ui.end_row();
                         ui.radio_value(&mut state.style, DrawStyle::Line, "Line");
                         ui.end_row();
+                        ui.radio_value(&mut state.style, DrawStyle::Curve, "Curve");
+                        ui.end_row();
                         ui.radio_value(&mut state.style, DrawStyle::Arrow, "Arrow");
                         ui.end_row();
                         ui.radio_value(&mut state.style, DrawStyle::Rect, "Rect");

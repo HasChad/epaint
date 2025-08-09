@@ -6,10 +6,7 @@ mod app_settings;
 mod drawing;
 mod ui;
 
-use crate::{
-    drawing::DrawState,
-    ui::ui::{TOP_BAR_SIZE, UI},
-};
+use crate::{drawing::DrawState, ui::ui::UI};
 use app_settings::*;
 
 #[macroquad::main(window_conf)]
@@ -30,7 +27,7 @@ async fn main() {
             y: mouse_position().1,
         });
 
-        if draw_state.can_draw && mouse_position().1 > TOP_BAR_SIZE {
+        if draw_state.can_draw {
             draw_state.drawing(world_mpos);
         }
 
