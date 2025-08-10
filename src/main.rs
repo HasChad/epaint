@@ -20,12 +20,19 @@ async fn main() {
     let mut draw_state = DrawState::new();
     let mut ui = UI::new();
 
-    loop {
+    'app: loop {
         camera_fixer(&mut camera, &mut zoomer);
         let world_mpos = camera.screen_to_world(Vec2 {
             x: mouse_position().0,
             y: mouse_position().1,
         });
+
+        if is_key_pressed(KeyCode::Escape) {
+            ui.quit_ui.visible = true;
+        }
+        if ui.quit_ui.quit_app {
+            break 'app;
+        }
 
         if draw_state.can_draw {
             draw_state.drawing(world_mpos);
