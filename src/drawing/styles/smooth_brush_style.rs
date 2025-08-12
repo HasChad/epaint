@@ -13,7 +13,7 @@ impl Drawable for SBrushStyle {
             });
         };
 
-        if is_mouse_button_down(MouseButton::Left) {
+        if is_mouse_button_down(MouseButton::Left) && !state.current_line.is_empty() {
             if mouse_delta_position().x != 0.0 || mouse_delta_position().y != 0.0 {
                 state.current_line.push(Vec2 {
                     x: mouse_pos.x,

@@ -18,7 +18,7 @@ impl Drawable for RectOStyle {
             });
         };
 
-        if is_mouse_button_down(MouseButton::Left) {
+        if is_mouse_button_down(MouseButton::Left) && !state.current_line.is_empty() {
             state.current_line[1] = Vec2 {
                 x: mouse_pos.x,
                 y: mouse_pos.y,
@@ -26,7 +26,9 @@ impl Drawable for RectOStyle {
         }
 
         if is_mouse_button_released(MouseButton::Left) {
-            state.meshing();
+            if state.current_line.len() > 1 {
+                state.meshing();
+            }
 
             state.current_line.clear();
         }

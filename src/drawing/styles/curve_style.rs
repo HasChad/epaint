@@ -23,7 +23,7 @@ impl Drawable for CurveStyle {
             }
         };
 
-        if is_mouse_button_down(MouseButton::Left) {
+        if is_mouse_button_down(MouseButton::Left) && !state.current_line.is_empty() {
             if state.current_line.len() == 2 {
                 state.current_line[1] = Vec2 {
                     x: mouse_pos.x,
